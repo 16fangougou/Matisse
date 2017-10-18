@@ -68,14 +68,9 @@ public class PicassoEngine implements ImageEngine {
     }
 
     @Override
-<<<<<<< HEAD
-    public void loadAnimatedGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
-        Picasso.with(context).load(uri).resize(resizeX, resizeY).priority(Picasso.Priority.HIGH)
-                .centerInside().into(imageView);
-=======
     public void loadGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
-        loadImage(context, resizeX, resizeY, imageView, uri);
->>>>>>> zhihu/master
+            Picasso.with(context).load(uri).resize(resizeX, resizeY).priority(Picasso.Priority.HIGH)
+                    .centerInside().into(imageView);
     }
 
     @Override
