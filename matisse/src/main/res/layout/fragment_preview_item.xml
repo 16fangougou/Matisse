@@ -18,10 +18,16 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <it.sephiroth.android.library.imagezoom.ImageViewTouch
+    <com.shizhefei.view.largeimage.LargeImageView
         android:id="@+id/image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <ImageView
+        android:id="@+id/image_view_gif"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/video_play_button"

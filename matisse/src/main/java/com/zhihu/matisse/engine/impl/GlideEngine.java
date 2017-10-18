@@ -22,7 +22,14 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.ViewTarget;
+import com.shizhefei.view.largeimage.LargeImageView;
+import com.shizhefei.view.largeimage.factory.FileBitmapDecoderFactory;
 import com.zhihu.matisse.engine.ImageEngine;
+
+import java.io.File;
 
 /**
  * {@link ImageEngine} implementation using Glide.
@@ -31,7 +38,7 @@ import com.zhihu.matisse.engine.ImageEngine;
 public class GlideEngine implements ImageEngine {
 
     @Override
-    public void loadThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView, Uri uri) {
+    public void loadThumbnail(Context context, final int resize, Drawable placeholder, ImageView imageView, Uri uri) {
         Glide.with(context)
                 .load(uri)
                 .asBitmap()  // some .jpeg files are actually gif
@@ -50,16 +57,19 @@ public class GlideEngine implements ImageEngine {
                 .placeholder(placeholder)
                 .override(resize, resize)
                 .centerCrop()
-                .into(imageView);
+		        .into(imageView);
     }
 
     @Override
-    public void loadImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
+    public void loadImage(Context context, int resizeX, int resizeY, final LargeImageView imageView, Uri uri) {
         Glide.with(context)
                 .load(uri)
-                .override(resizeX, resizeY)
-                .priority(Priority.HIGH)
-                .into(imageView);
+		        .downloadOnly(new ViewTarget<LargeImageView, File>(imageView) {
+			        @Override
+			        public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
+				        imageView.setImage(new FileBitmapDecoderFactory(resource));
+			        }
+		        });
     }
 
     @Override
@@ -67,8 +77,8 @@ public class GlideEngine implements ImageEngine {
         Glide.with(context)
                 .load(uri)
                 .asGif()
-                .override(resizeX, resizeY)
-                .priority(Priority.HIGH)
+		        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+		        .priority(Priority.HIGH)
                 .into(imageView);
     }
 

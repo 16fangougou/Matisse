@@ -16,11 +16,14 @@
 package com.zhihu.matisse.engine.impl;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.widget.ImageView;
 
+import com.shizhefei.view.largeimage.LargeImageView;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import com.zhihu.matisse.engine.ImageEngine;
 
 /**
@@ -44,14 +47,30 @@ public class PicassoEngine implements ImageEngine {
     }
 
     @Override
-    public void loadImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
+    public void loadImage(Context context, int resizeX, int resizeY, final LargeImageView imageView, Uri uri) {
         Picasso.with(context).load(uri).resize(resizeX, resizeY).priority(Picasso.Priority.HIGH)
-                .centerInside().into(imageView);
+                .centerInside().into(new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                imageView.setImage(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                imageView.setImage(errorDrawable);
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                imageView.setImage(placeHolderDrawable);
+            }
+        });
     }
 
     @Override
     public void loadAnimatedGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
-        loadImage(context, resizeX, resizeY, imageView, uri);
+        Picasso.with(context).load(uri).resize(resizeX, resizeY).priority(Picasso.Priority.HIGH)
+                .centerInside().into(imageView);
     }
 
     @Override

@@ -18,7 +18,7 @@ apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         minSdkVersion 11
@@ -42,10 +42,11 @@ dependencies {
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
-    compile 'it.sephiroth.android.library.imagezoom:library:1.0.4'
 
-    provided 'com.github.bumptech.glide:glide:3.7.0'
+    provided 'com.github.bumptech.glide:glide:3.8.0'
     provided 'com.squareup.picasso:picasso:2.5.2'
+    // largeimage
+    compile 'com.shizhefei:LargeImageView:1.0.9'
 }
 
 // jcenter configuration for novoda's bintray-release
@@ -54,7 +55,7 @@ publish {
     userOrg = 'zhihu'
     groupId = 'com.zhihu.android'
     artifactId = 'matisse'
-    publishVersion = '0.4.3'
+    publishVersion = '0.5.5'
     desc = 'A well-designed local image selector for Android'
     website = 'https://www.zhihu.com/'
 }

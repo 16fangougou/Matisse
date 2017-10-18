@@ -20,6 +20,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.widget.ImageView;
 
+import com.shizhefei.view.largeimage.LargeImageView;
+
 /**
  * Image loader interface. There are predefined {@link com.zhihu.matisse.engine.impl.GlideEngine}
  * and {@link com.zhihu.matisse.engine.impl.PicassoEngine}.
@@ -59,7 +61,7 @@ public interface ImageEngine {
      * @param imageView ImageView widget
      * @param uri       Uri of the loaded image
      */
-    void loadImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri);
+    void loadImage(Context context, int resizeX, int resizeY, LargeImageView imageView, Uri uri);
 
     /**
      * Load a gif image resource.
