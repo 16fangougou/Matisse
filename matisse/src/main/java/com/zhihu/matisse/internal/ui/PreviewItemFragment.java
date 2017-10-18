@@ -85,7 +85,7 @@ public class PreviewItemFragment extends Fragment {
         if (item.isGif()) {
             image.setVisibility(View.GONE);
             imageViewGif.setVisibility(View.VISIBLE);
-            SelectionSpec.getInstance().imageEngine.loadAnimatedGifImage(getContext(), size.x, size.y, imageViewGif,
+            SelectionSpec.getInstance().imageEngine.loadGifImage(getContext(), size.x, size.y, imageViewGif,
                     item.getContentUri());
         } else {
             imageViewGif.setVisibility(View.GONE);

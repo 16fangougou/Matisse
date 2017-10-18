@@ -20,7 +20,9 @@ import android.content.pm.ActivityInfo;
 import android.support.annotation.StyleRes;
 
 import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.R;
 import com.zhihu.matisse.engine.ImageEngine;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.filter.Filter;
 
 import java.util.List;
@@ -29,6 +31,8 @@ import java.util.Set;
 public final class SelectionSpec {
 
     public Set<MimeType> mimeTypeSet;
+    public boolean mediaTypeExclusive;
+    public boolean showSingleMediaType;
     @StyleRes
     public int themeId;
     public int orientation;
@@ -55,23 +59,37 @@ public final class SelectionSpec {
         return selectionSpec;
     }
 
-    void reset() {
+    private void reset() {
         mimeTypeSet = null;
-        themeId = 0;
+        mediaTypeExclusive = true;
+        showSingleMediaType = false;
+        themeId = R.style.Matisse_Zhihu;
         orientation = 0;
         countable = false;
-        maxSelectable = 0;
+        maxSelectable = 1;
         filters = null;
         capture = false;
         captureStrategy = null;
-        spanCount = 0;
+        spanCount = 3;
         gridExpectedSize = 0;
-        thumbnailScale = 0.0f;
-        imageEngine = null;
+        thumbnailScale = 0.5f;
+        imageEngine = new GlideEngine();
+    }
+
+    public boolean singleSelectionModeEnabled() {
+        return !countable && maxSelectable == 1;
     }
 
     public boolean needOrientationRestriction() {
         return orientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    }
+
+    public boolean onlyShowImages() {
+        return showSingleMediaType && MimeType.ofImage().containsAll(mimeTypeSet);
+    }
+
+    public boolean onlyShowVideos() {
+        return showSingleMediaType && MimeType.ofVideo().containsAll(mimeTypeSet);
     }
 
     private static final class InstanceHolder {

@@ -50,7 +50,7 @@ public interface ImageEngine {
      * @param imageView   ImageView widget
      * @param uri         Uri of the loaded image
      */
-    void loadAnimatedGifThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView, Uri uri);
+    void loadGifThumbnail(Context context, int resize, Drawable placeholder, ImageView imageView, Uri uri);
 
     /**
      * Load a static image resource.
@@ -72,10 +72,11 @@ public interface ImageEngine {
      * @param imageView ImageView widget
      * @param uri       Uri of the loaded image
      */
-    void loadAnimatedGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri);
+    void loadGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri);
 
     /**
-     * Whether this implementation supports animated gif. Just knowledge of it, convenient for users.
+     * Whether this implementation supports animated gif.
+     * Just knowledge of it, convenient for users.
      *
      * @return true support animated gif, false do not support animated gif.
      */

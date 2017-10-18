@@ -41,7 +41,7 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 
 public final class PhotoMetadataUtils {
-    public static final String TAG = PhotoMetadataUtils.class.getSimpleName();
+    private static final String TAG = PhotoMetadataUtils.class.getSimpleName();
     private static final int MAX_WIDTH = 1600;
     private static final String SCHEME_CONTENT = "content";
 
@@ -129,16 +129,16 @@ public final class PhotoMetadataUtils {
 
         if (SelectionSpec.getInstance().filters != null) {
             for (Filter filter : SelectionSpec.getInstance().filters) {
-                IncapableCause IncapableCause = filter.filter(context, item);
-                if (IncapableCause != null) {
-                    return IncapableCause;
+                IncapableCause incapableCause = filter.filter(context, item);
+                if (incapableCause != null) {
+                    return incapableCause;
                 }
             }
         }
         return null;
     }
 
-    public static boolean isSelectableType(Context context, Item item) {
+    private static boolean isSelectableType(Context context, Item item) {
         if (context == null) {
             return false;
         }
@@ -152,7 +152,7 @@ public final class PhotoMetadataUtils {
         return false;
     }
 
-    public static boolean shouldRotate(ContentResolver resolver, Uri uri) {
+    private static boolean shouldRotate(ContentResolver resolver, Uri uri) {
         ExifInterface exif;
         try {
             exif = ExifInterfaceCompat.newInstance(getPath(resolver, uri));

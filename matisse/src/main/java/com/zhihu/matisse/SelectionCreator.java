@@ -18,8 +18,10 @@ package com.zhihu.matisse;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
 
@@ -32,12 +34,13 @@ import com.zhihu.matisse.ui.MatisseActivity;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
@@ -49,29 +52,16 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 
 /**
  * Fluent API for building media select specification.
  */
 @SuppressWarnings("unused")
-public final class SelectionSpecBuilder {
+public final class SelectionCreator {
     private final Matisse mMatisse;
     private final SelectionSpec mSelectionSpec;
-    private final Set<MimeType> mMimeType;
-    private int mThemeId;
-    private int mOrientation;
-    private boolean mCountable;
-    private int mMaxSelectable;
-    private List<Filter> mFilters;
-    private boolean mCapture;
-    private CaptureStrategy mCaptureStrategy;
-    private int mSpanCount;
-    private int mGridExpectedSize;
-    private float mThumbnailScale;
-    private ImageEngine mImageEngine;
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @IntDef({
             SCREEN_ORIENTATION_UNSPECIFIED,
             SCREEN_ORIENTATION_LANDSCAPE,
@@ -97,14 +87,28 @@ public final class SelectionSpecBuilder {
     /**
      * Constructs a new specification builder on the context.
      *
-     * @param matisse  a requester context wrapper.
-     * @param mimeType MIME type set to select.
+     * @param matisse   a requester context wrapper.
+     * @param mimeTypes MIME type set to select.
      */
-    SelectionSpecBuilder(Matisse matisse, @NonNull Set<MimeType> mimeType) {
+    SelectionCreator(Matisse matisse, @NonNull Set<MimeType> mimeTypes, boolean mediaTypeExclusive) {
         mMatisse = matisse;
-        mMimeType = mimeType;
         mSelectionSpec = SelectionSpec.getCleanInstance();
-        mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+        mSelectionSpec.mimeTypeSet = mimeTypes;
+        mSelectionSpec.mediaTypeExclusive = mediaTypeExclusive;
+        mSelectionSpec.orientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    }
+
+    /**
+     * Whether to show only one media type if choosing medias are only images or videos.
+     *
+     * @param showSingleMediaType whether to show only one media type, either images or videos.
+     * @return {@link SelectionCreator} for fluent API.
+     * @see SelectionSpec#onlyShowImages()
+     * @see SelectionSpec#onlyShowVideos()
+     */
+    public SelectionCreator showSingleMediaType(boolean showSingleMediaType) {
+        mSelectionSpec.showSingleMediaType = showSingleMediaType;
+        return this;
     }
 
     /**
@@ -116,10 +120,10 @@ public final class SelectionSpecBuilder {
      * you can define a custom theme derived from the above ones or other themes.
      *
      * @param themeId theme resource id. Default value is com.zhihu.matisse.R.style.Matisse_Zhihu.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder theme(@StyleRes int themeId) {
-        mThemeId = themeId;
+    public SelectionCreator theme(@StyleRes int themeId) {
+        mSelectionSpec.themeId = themeId;
         return this;
     }
 
@@ -128,10 +132,10 @@ public final class SelectionSpecBuilder {
      *
      * @param countable true for a auto-increased number from 1, false for a check mark. Default
      *                  value is false.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder countable(boolean countable) {
-        mCountable = countable;
+    public SelectionCreator countable(boolean countable) {
+        mSelectionSpec.countable = countable;
         return this;
     }
 
@@ -139,10 +143,12 @@ public final class SelectionSpecBuilder {
      * Maximum selectable count.
      *
      * @param maxSelectable Maximum selectable count. Default value is 1.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder maxSelectable(int maxSelectable) {
-        mMaxSelectable = maxSelectable;
+    public SelectionCreator maxSelectable(int maxSelectable) {
+        if (maxSelectable < 1)
+            throw new IllegalArgumentException("maxSelectable must be greater than or equal to one");
+        mSelectionSpec.maxSelectable = maxSelectable;
         return this;
     }
 
@@ -150,13 +156,14 @@ public final class SelectionSpecBuilder {
      * Add filter to filter each selecting item.
      *
      * @param filter {@link Filter}
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder addFilter(Filter filter) {
-        if (mFilters == null) {
-            mFilters = new ArrayList<>();
+    public SelectionCreator addFilter(@NonNull Filter filter) {
+        if (mSelectionSpec.filters == null) {
+            mSelectionSpec.filters = new ArrayList<>();
         }
-        mFilters.add(filter);
+        if (filter == null) throw new IllegalArgumentException("filter cannot be null");
+        mSelectionSpec.filters.add(filter);
         return this;
     }
 
@@ -166,10 +173,10 @@ public final class SelectionSpecBuilder {
      * If this value is set true, photo capturing entry will appear only on All Media's page.
      *
      * @param enable Whether to enable capturing or not. Default value is false;
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder capture(boolean enable) {
-        mCapture = enable;
+    public SelectionCreator capture(boolean enable) {
+        mSelectionSpec.capture = enable;
         return this;
     }
 
@@ -178,10 +185,10 @@ public final class SelectionSpecBuilder {
      * storage and also a authority for {@link android.support.v4.content.FileProvider}.
      *
      * @param captureStrategy {@link CaptureStrategy}, needed only when capturing is enabled.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder captureStrategy(CaptureStrategy captureStrategy) {
-        mCaptureStrategy = captureStrategy;
+    public SelectionCreator captureStrategy(CaptureStrategy captureStrategy) {
+        mSelectionSpec.captureStrategy = captureStrategy;
         return this;
     }
 
@@ -190,11 +197,11 @@ public final class SelectionSpecBuilder {
      *
      * @param orientation An orientation constant as used in {@link ScreenOrientation}.
      *                    Default value is {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_PORTRAIT}.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      * @see Activity#setRequestedOrientation(int)
      */
-    public SelectionSpecBuilder restrictOrientation(@ScreenOrientation int orientation) {
-        mOrientation = orientation;
+    public SelectionCreator restrictOrientation(@ScreenOrientation int orientation) {
+        mSelectionSpec.orientation = orientation;
         return this;
     }
 
@@ -204,10 +211,11 @@ public final class SelectionSpecBuilder {
      * This will be ignored when {@link #gridExpectedSize(int)} is set.
      *
      * @param spanCount Requested span count.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder spanCount(int spanCount) {
-        mSpanCount = spanCount;
+    public SelectionCreator spanCount(int spanCount) {
+        if (spanCount < 1) throw new IllegalArgumentException("spanCount cannot be less than 1");
+        mSelectionSpec.spanCount = spanCount;
         return this;
     }
 
@@ -217,10 +225,10 @@ public final class SelectionSpecBuilder {
      * size will be as close to this value as possible.
      *
      * @param size Expected media grid size in pixel.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder gridExpectedSize(int size) {
-        mGridExpectedSize = size;
+    public SelectionCreator gridExpectedSize(int size) {
+        mSelectionSpec.gridExpectedSize = size;
         return this;
     }
 
@@ -229,10 +237,12 @@ public final class SelectionSpecBuilder {
      * 1.0].
      *
      * @param scale Thumbnail's scale in (0.0, 1.0]. Default value is 0.5.
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder thumbnailScale(float scale) {
-        mThumbnailScale = scale;
+    public SelectionCreator thumbnailScale(float scale) {
+        if (scale <= 0f || scale > 1f)
+            throw new IllegalArgumentException("Thumbnail scale must be between (0.0, 1.0]");
+        mSelectionSpec.thumbnailScale = scale;
         return this;
     }
 
@@ -245,10 +255,10 @@ public final class SelectionSpecBuilder {
      * And you can implement your own image engine.
      *
      * @param imageEngine {@link ImageEngine}
-     * @return {@link SelectionSpecBuilder} for fluent API.
+     * @return {@link SelectionCreator} for fluent API.
      */
-    public SelectionSpecBuilder imageEngine(ImageEngine imageEngine) {
-        mImageEngine = imageEngine;
+    public SelectionCreator imageEngine(ImageEngine imageEngine) {
+        mSelectionSpec.imageEngine = imageEngine;
         return this;
     }
 
@@ -262,48 +272,6 @@ public final class SelectionSpecBuilder {
         if (activity == null) {
             return;
         }
-
-        mSelectionSpec.mimeTypeSet = mMimeType;
-        if (mThemeId == 0) {
-            mThemeId = R.style.Matisse_Zhihu;
-        }
-        mSelectionSpec.themeId = mThemeId;
-        mSelectionSpec.orientation = mOrientation;
-
-        if (mMaxSelectable <= 1) {
-            mSelectionSpec.countable = false;
-            mSelectionSpec.maxSelectable = 1;
-        } else {
-            mSelectionSpec.countable = mCountable;
-            mSelectionSpec.maxSelectable = mMaxSelectable;
-        }
-
-        if (mFilters != null && mFilters.size() > 0) {
-            mSelectionSpec.filters = mFilters;
-        }
-        mSelectionSpec.capture = mCapture;
-        if (mCapture) {
-            if (mCaptureStrategy == null) {
-                throw new IllegalArgumentException("Don't forget to set CaptureStrategy.");
-            }
-            mSelectionSpec.captureStrategy = mCaptureStrategy;
-        }
-
-        if (mGridExpectedSize > 0) {
-            mSelectionSpec.gridExpectedSize = mGridExpectedSize;
-        } else {
-            mSelectionSpec.spanCount = mSpanCount <= 0 ? 3 : mSpanCount;
-        }
-
-        if (mThumbnailScale < 0 || mThumbnailScale > 1.0f) {
-            throw new IllegalArgumentException("Thumbnail scale must be between (0.0, 1.0]");
-        }
-        if (mThumbnailScale == 0) {
-            mThumbnailScale = 0.5f;
-        }
-        mSelectionSpec.thumbnailScale = mThumbnailScale;
-
-        mSelectionSpec.imageEngine = mImageEngine;
 
         Intent intent = new Intent(activity, MatisseActivity.class);
 

@@ -35,13 +35,14 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.engine.impl.PicassoEngine;
 import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import java.util.List;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class SampleActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int REQUEST_CODE_CHOOSE = 23;
 
@@ -74,9 +75,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (aBoolean) {
                             switch (v.getId()) {
                                 case R.id.zhihu:
-                                    Matisse.from(MainActivity.this)
-                                            .choose(MimeType.ofAll())
+                                    Matisse.from(SampleActivity.this)
+                                            .choose(MimeType.ofAll(), false)
                                             .countable(true)
+                                            .capture(true)
+                                            .captureStrategy(
+                                                    new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider"))
                                             .maxSelectable(9)
                                             .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                                             .gridExpectedSize(
@@ -87,8 +91,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             .forResult(REQUEST_CODE_CHOOSE);
                                     break;
                                 case R.id.dracula:
-                                    Matisse.from(MainActivity.this)
-                                            .choose(MimeType.of(MimeType.JPEG, MimeType.PNG))
+                                    Matisse.from(SampleActivity.this)
+                                            .choose(MimeType.ofImage())
                                             .theme(R.style.Matisse_Dracula)
                                             .countable(false)
                                             .maxSelectable(9)
@@ -96,9 +100,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             .forResult(REQUEST_CODE_CHOOSE);
                                     break;
                             }
-                            mAdapter.setData(null);
+                            mAdapter.setData(null, null);
                         } else {
-                            Toast.makeText(MainActivity.this, R.string.permission_request_denied, Toast.LENGTH_LONG)
+                            Toast.makeText(SampleActivity.this, R.string.permission_request_denied, Toast.LENGTH_LONG)
                                     .show();
                         }
                     }
@@ -119,29 +123,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
-            mAdapter.setData(Matisse.obtainResult(data));
+            mAdapter.setData(Matisse.obtainResult(data), Matisse.obtainPathResult(data));
         }
     }
 
     private static class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder> {
 
         private List<Uri> mUris;
+        private List<String> mPaths;
 
-        void setData(List<Uri> uris) {
+        void setData(List<Uri> uris, List<String> paths) {
             mUris = uris;
+            mPaths = paths;
             notifyDataSetChanged();
         }
 
         @Override
         public UriViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new UriViewHolder(
-                    (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.uri_item, parent, false));
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.uri_item, parent, false));
         }
 
         @Override
         public void onBindViewHolder(UriViewHolder holder, int position) {
-            Uri uri = mUris.get(position);
-            holder.mUri.setText(uri.toString());
+            holder.mUri.setText(mUris.get(position).toString());
+            holder.mPath.setText(mPaths.get(position));
+
+            holder.mUri.setAlpha(position % 2 == 0 ? 1.0f : 0.54f);
+            holder.mPath.setAlpha(position % 2 == 0 ? 1.0f : 0.54f);
         }
 
         @Override
@@ -152,10 +161,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         static class UriViewHolder extends RecyclerView.ViewHolder {
 
             private TextView mUri;
+            private TextView mPath;
 
-            UriViewHolder(TextView uri) {
-                super(uri);
-                mUri = uri;
+            UriViewHolder(View contentView) {
+                super(contentView);
+                mUri = (TextView) contentView.findViewById(R.id.uri);
+                mPath = (TextView) contentView.findViewById(R.id.path);
             }
         }
     }

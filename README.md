@@ -27,22 +27,21 @@ dependencies {
 }
 ```
 
-## ProGuard
-If you use [Glide](https://github.com/bumptech/glide) as your image engine, you may need the following rules:
-```pro
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
+Check out [Matisse releases](https://github.com/zhihu/Matisse/releases) to see more unstable versions.
 
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-```
-If you use [Picasso](https://github.com/square/picasso) as your image engine, you may need the following rules:
+## ProGuard
+If you use [Glide](https://github.com/bumptech/glide) as your image engine, add rules as Glide's README says.  
+And add extra rule:
 ```pro
--dontwarn com.squareup.okhttp.**
+-dontwarn com.squareup.picasso.**
 ```
+
+If you use [Picasso](https://github.com/square/picasso) as your image engine, add rules as Picasso's README says.  
+And add extra rule:
+```pro
+-dontwarn com.bumptech.glide.**
+```
+**Attention**: The above progurad rules are correct.
 
 ## How do I use Matisse?
 #### Permission
@@ -96,9 +95,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 Find more details about Matisse in [wiki](https://github.com/zhihu/Matisse/wiki).
 
 ## Contributing
- - To contribute with a small fix, simply create a pull request.
- - Better to open an issue to discuss with the team and the community if you're intended to work on something BIG. Also you can check our [roadmap](https://github.com/zhihu/Matisse/wiki/Roadmap).
- - Please follow [Code Style for Contributors](https://source.android.com/source/code-style) of AOSP.
+[Matisse is an Open Source Project](https://github.com/zhihu/Matisse/blob/master/CONTRIBUTING.md)
 
 ## Thanks
 This library is inspired by [Laevatein](https://github.com/nohana/Laevatein) and uses some of its source code.

@@ -16,14 +16,16 @@
 package com.zhihu.matisse.internal.model;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 
 import com.zhihu.matisse.R;
+import com.zhihu.matisse.internal.entity.IncapableCause;
 import com.zhihu.matisse.internal.entity.Item;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
-import com.zhihu.matisse.internal.entity.IncapableCause;
 import com.zhihu.matisse.internal.ui.widget.CheckView;
+import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 
 import java.util.ArrayList;
@@ -34,11 +36,8 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class SelectedItemCollection {
 
-    public static final String STATE_SELECTION = "state_selection", STATE_COLLECTION_TYPE = "state_collection_type";
-    private final Context mContext;
-    private Set<Item> mItems;
-    private SelectionSpec mSpec;
-
+    public static final String STATE_SELECTION = "state_selection";
+    public static final String STATE_COLLECTION_TYPE = "state_collection_type";
     /**
      * Empty collection
      */
@@ -53,18 +52,17 @@ public class SelectedItemCollection {
     public static final int COLLECTION_VIDEO = 0x01 << 1;
     /**
      * Collection with images and videos.
-     *
-     * Not supported currently.
      */
     public static final int COLLECTION_MIXED = COLLECTION_IMAGE | COLLECTION_VIDEO;
-
+    private final Context mContext;
+    private Set<Item> mItems;
     private int mCollectionType = COLLECTION_UNDEFINED;
 
     public SelectedItemCollection(Context context) {
         mContext = context;
     }
 
-    public void onCreate(Bundle bundle, SelectionSpec spec) {
+    public void onCreate(Bundle bundle) {
         if (bundle == null) {
             mItems = new LinkedHashSet<>();
         } else {
@@ -72,7 +70,6 @@ public class SelectedItemCollection {
             mItems = new LinkedHashSet<>(saved);
             mCollectionType = bundle.getInt(STATE_COLLECTION_TYPE, COLLECTION_UNDEFINED);
         }
-        mSpec = spec;
     }
 
     public void setDefaultSelection(List<Item> uris) {
@@ -95,22 +92,39 @@ public class SelectedItemCollection {
         if (typeConflict(item)) {
             throw new IllegalArgumentException("Can't select images and videos at the same time.");
         }
-        if (mCollectionType == COLLECTION_UNDEFINED) {
-            if (item.isImage()) {
-                mCollectionType = COLLECTION_IMAGE;
-            } else if (item.isVideo()) {
-                mCollectionType = COLLECTION_VIDEO;
+        boolean added = mItems.add(item);
+        if (added) {
+            if (mCollectionType == COLLECTION_UNDEFINED) {
+                if (item.isImage()) {
+                    mCollectionType = COLLECTION_IMAGE;
+                } else if (item.isVideo()) {
+                    mCollectionType = COLLECTION_VIDEO;
+                }
+            } else if (mCollectionType == COLLECTION_IMAGE) {
+                if (item.isVideo()) {
+                    mCollectionType = COLLECTION_MIXED;
+                }
+            } else if (mCollectionType == COLLECTION_VIDEO) {
+                if (item.isImage()) {
+                    mCollectionType = COLLECTION_MIXED;
+                }
             }
         }
-        return mItems.add(item);
+        return added;
     }
 
     public boolean remove(Item item) {
-        boolean result = mItems.remove(item);
-        if (mItems.size() == 0) {
-            mCollectionType = COLLECTION_UNDEFINED;
+        boolean removed = mItems.remove(item);
+        if (removed) {
+            if (mItems.size() == 0) {
+                mCollectionType = COLLECTION_UNDEFINED;
+            } else {
+                if (mCollectionType == COLLECTION_MIXED) {
+                    refineCollectionType();
+                }
+            }
         }
-        return result;
+        return removed;
     }
 
     public void overwrite(ArrayList<Item> items, int collectionType) {
@@ -136,6 +150,14 @@ public class SelectedItemCollection {
         return uris;
     }
 
+    public List<String> asListOfString() {
+        List<String> paths = new ArrayList<>();
+        for (Item item : mItems) {
+            paths.add(PathUtils.getPath(mContext, item.getContentUri()));
+        }
+        return paths;
+    }
+
     public boolean isEmpty() {
         return mItems == null || mItems.isEmpty();
     }
@@ -146,7 +168,23 @@ public class SelectedItemCollection {
 
     public IncapableCause isAcceptable(Item item) {
         if (maxSelectableReached()) {
-            return new IncapableCause(mContext.getString(R.string.error_over_count, mSpec.maxSelectable));
+            int maxSelectable = SelectionSpec.getInstance().maxSelectable;
+            String cause;
+
+            try {
+                cause = mContext.getResources().getQuantityString(
+                        R.plurals.error_over_count,
+                        maxSelectable,
+                        maxSelectable
+                );
+            } catch (Resources.NotFoundException e) {
+                cause = mContext.getString(
+                        R.string.error_over_count,
+                        maxSelectable
+                );
+            }
+
+            return new IncapableCause(cause);
         } else if (typeConflict(item)) {
             return new IncapableCause(mContext.getString(R.string.error_type_conflict));
         }
@@ -155,27 +193,41 @@ public class SelectedItemCollection {
     }
 
     public boolean maxSelectableReached() {
-        return mItems.size() == mSpec.maxSelectable;
+        return mItems.size() == SelectionSpec.getInstance().maxSelectable;
     }
 
     public int getCollectionType() {
         return mCollectionType;
     }
 
+    private void refineCollectionType() {
+        boolean hasImage = false;
+        boolean hasVideo = false;
+        for (Item i : mItems) {
+            if (i.isImage() && !hasImage) hasImage = true;
+            if (i.isVideo() && !hasVideo) hasVideo = true;
+        }
+        if (hasImage && hasVideo) {
+            mCollectionType = COLLECTION_MIXED;
+        } else if (hasImage) {
+            mCollectionType = COLLECTION_IMAGE;
+        } else if (hasVideo) {
+            mCollectionType = COLLECTION_VIDEO;
+        }
+    }
+
     /**
-     * Determine whether there will be conflict media types. A user can't select images and videos at the same time.
+     * Determine whether there will be conflict media types. A user can only select images and videos at the same time
+     * while {@link SelectionSpec#mediaTypeExclusive} is set to false.
      */
     public boolean typeConflict(Item item) {
-        return (item.isImage() && (mCollectionType == COLLECTION_VIDEO || mCollectionType == COLLECTION_MIXED))
-                || (item.isVideo() && (mCollectionType == COLLECTION_IMAGE || mCollectionType == COLLECTION_MIXED));
+        return SelectionSpec.getInstance().mediaTypeExclusive
+                && ((item.isImage() && (mCollectionType == COLLECTION_VIDEO || mCollectionType == COLLECTION_MIXED))
+                || (item.isVideo() && (mCollectionType == COLLECTION_IMAGE || mCollectionType == COLLECTION_MIXED)));
     }
 
     public int count() {
         return mItems.size();
-    }
-
-    public int maxSelectable() {
-        return mSpec.maxSelectable;
     }
 
     public int checkedNumOf(Item item) {

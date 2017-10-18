@@ -16,8 +16,10 @@
 package com.zhihu.matisse.internal.ui.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.os.Build;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.ListPopupWindow;
 import android.view.View;
@@ -27,10 +29,11 @@ import android.widget.TextView;
 
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
+import com.zhihu.matisse.internal.utils.Platform;
 
 public class AlbumsSpinner {
 
-    private static final int sMaxShownCount = 6;
+    private static final int MAX_SHOWN_COUNT = 6;
     private CursorAdapter mAdapter;
     private TextView mSelected;
     private ListPopupWindow mListPopupWindow;
@@ -74,7 +77,7 @@ public class AlbumsSpinner {
         if (mSelected.getVisibility() == View.VISIBLE) {
             mSelected.setText(displayName);
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (Platform.hasICS()) {
                 mSelected.setAlpha(0.0f);
                 mSelected.setVisibility(View.VISIBLE);
                 mSelected.setText(displayName);
@@ -95,6 +98,15 @@ public class AlbumsSpinner {
 
     public void setSelectedTextView(TextView textView) {
         mSelected = textView;
+        // tint dropdown arrow icon
+        Drawable[] drawables = mSelected.getCompoundDrawables();
+        Drawable right = drawables[2];
+        TypedArray ta = mSelected.getContext().getTheme().obtainStyledAttributes(
+                new int[]{R.attr.album_element_color});
+        int color = ta.getColor(0, 0);
+        ta.recycle();
+        right.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+
         mSelected.setVisibility(View.GONE);
         mSelected.setOnClickListener(new View.OnClickListener() {
 
@@ -102,11 +114,12 @@ public class AlbumsSpinner {
             public void onClick(View v) {
                 int itemHeight = v.getResources().getDimensionPixelSize(R.dimen.album_item_height);
                 mListPopupWindow.setHeight(
-                        mAdapter.getCount() > sMaxShownCount ? itemHeight * sMaxShownCount
+                        mAdapter.getCount() > MAX_SHOWN_COUNT ? itemHeight * MAX_SHOWN_COUNT
                                 : itemHeight * mAdapter.getCount());
                 mListPopupWindow.show();
             }
         });
+        mSelected.setOnTouchListener(mListPopupWindow.createDragToOpenListener(mSelected));
     }
 
     public void setPopupAnchorView(View view) {

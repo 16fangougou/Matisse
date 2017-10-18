@@ -16,6 +16,7 @@
 package com.zhihu.matisse.internal.ui.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -84,7 +85,13 @@ public class CheckView extends View {
         mStrokePaint.setStyle(Paint.Style.STROKE);
         mStrokePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         mStrokePaint.setStrokeWidth(STROKE_WIDTH * mDensity);
-        mStrokePaint.setColor(Color.WHITE);
+        TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{R.attr.item_checkCircle_borderColor});
+        int defaultColor = ResourcesCompat.getColor(
+                getResources(), R.color.zhihu_item_checkCircle_borderColor,
+                getContext().getTheme());
+        int color = ta.getColor(0, defaultColor);
+        ta.recycle();
+        mStrokePaint.setColor(color);
 
         mCheckDrawable = ResourcesCompat.getDrawable(context.getResources(),
                 R.drawable.ic_check_white_18dp, context.getTheme());
@@ -140,9 +147,10 @@ public class CheckView extends View {
                 canvas.drawCircle((float) SIZE * mDensity / 2, (float) SIZE * mDensity / 2,
                         BG_RADIUS * mDensity, mBackgroundPaint);
                 initTextPaint();
-                int baseX = (int) (canvas.getWidth() / 2 - mTextPaint.measureText(String.valueOf(mCheckedNum)) / 2);
-                int baseY = (int) ((canvas.getHeight() / 2) - ((mTextPaint.descent() + mTextPaint.ascent()) / 2));
-                canvas.drawText(String.valueOf(mCheckedNum), baseX, baseY, mTextPaint);
+                String text = String.valueOf(mCheckedNum);
+                int baseX = (int) (canvas.getWidth() - mTextPaint.measureText(text)) / 2;
+                int baseY = (int) (canvas.getHeight() - mTextPaint.descent() - mTextPaint.ascent()) / 2;
+                canvas.drawText(text, baseX, baseY, mTextPaint);
             }
         } else {
             if (mChecked) {
@@ -187,7 +195,14 @@ public class CheckView extends View {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setAntiAlias(true);
             mBackgroundPaint.setStyle(Paint.Style.FILL);
-            mBackgroundPaint.setColor(Color.parseColor("#1E8AE8"));
+            TypedArray ta = getContext().getTheme()
+                    .obtainStyledAttributes(new int[]{R.attr.item_checkCircle_backgroundColor});
+            int defaultColor = ResourcesCompat.getColor(
+                    getResources(), R.color.zhihu_item_checkCircle_backgroundColor,
+                    getContext().getTheme());
+            int color = ta.getColor(0, defaultColor);
+            ta.recycle();
+            mBackgroundPaint.setColor(color);
         }
     }
 

@@ -17,7 +17,6 @@ package com.zhihu.matisse.internal.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
@@ -34,6 +33,7 @@ import com.zhihu.matisse.internal.model.SelectedItemCollection;
 import com.zhihu.matisse.internal.ui.adapter.PreviewPagerAdapter;
 import com.zhihu.matisse.internal.ui.widget.CheckView;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
+import com.zhihu.matisse.internal.utils.Platform;
 
 public abstract class BasePreviewActivity extends AppCompatActivity implements View.OnClickListener,
         ViewPager.OnPageChangeListener {
@@ -57,9 +57,10 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        setTheme(SelectionSpec.getInstance().themeId);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media_preview);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Platform.hasKitKat()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
 
@@ -69,9 +70,9 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
         }
 
         if (savedInstanceState == null) {
-            mSelectedCollection.onCreate(getIntent().getBundleExtra(EXTRA_DEFAULT_BUNDLE), mSpec);
+            mSelectedCollection.onCreate(getIntent().getBundleExtra(EXTRA_DEFAULT_BUNDLE));
         } else {
-            mSelectedCollection.onCreate(savedInstanceState, mSpec);
+            mSelectedCollection.onCreate(savedInstanceState);
         }
 
         mButtonBack = (TextView) findViewById(R.id.button_back);
@@ -82,7 +83,8 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
 
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.addOnPageChangeListener(this);
-        mPager.setAdapter(mAdapter = new PreviewPagerAdapter(getSupportFragmentManager(), null));
+        mAdapter = new PreviewPagerAdapter(getSupportFragmentManager(), null);
+        mPager.setAdapter(mAdapter);
         mCheckView = (CheckView) findViewById(R.id.check_view);
         mCheckView.setCountable(mSpec.countable);
 
@@ -178,8 +180,11 @@ public abstract class BasePreviewActivity extends AppCompatActivity implements V
     private void updateApplyButton() {
         int selectedCount = mSelectedCollection.count();
         if (selectedCount == 0) {
-            mButtonApply.setText(R.string.button_apply_disable);
+            mButtonApply.setText(R.string.button_apply_default);
             mButtonApply.setEnabled(false);
+        } else if (selectedCount == 1 && mSpec.singleSelectionModeEnabled()) {
+            mButtonApply.setText(R.string.button_apply_default);
+            mButtonApply.setEnabled(true);
         } else {
             mButtonApply.setEnabled(true);
             mButtonApply.setText(getString(R.string.button_apply, selectedCount));
