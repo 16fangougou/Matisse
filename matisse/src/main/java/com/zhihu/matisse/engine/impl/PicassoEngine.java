@@ -25,6 +25,7 @@ import com.shizhefei.view.largeimage.LargeImageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import com.zhihu.matisse.engine.ImageEngine;
+import com.zhihu.matisse.ui.MatisseActivity;
 
 /**
  * {@link ImageEngine} implementation using Picasso.
@@ -37,6 +38,7 @@ public class PicassoEngine implements ImageEngine {
         Picasso.with(context).load(uri).placeholder(placeholder)
                 .resize(resize, resize)
                 .centerCrop()
+                .tag(MatisseActivity.LOAD_TAG)
                 .into(imageView);
     }
 
@@ -71,6 +73,16 @@ public class PicassoEngine implements ImageEngine {
     public void loadGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri) {
             Picasso.with(context).load(uri).resize(resizeX, resizeY).priority(Picasso.Priority.HIGH)
                     .centerInside().into(imageView);
+    }
+
+    @Override
+    public void pauseLoad(Context context, String tag) {
+        Picasso.with(context).pauseTag(tag);
+    }
+
+    @Override
+    public void resumeLoad(Context context, String tag) {
+        Picasso.with(context).resumeTag(tag);
     }
 
     @Override

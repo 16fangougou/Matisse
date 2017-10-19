@@ -35,6 +35,7 @@ import com.zhihu.matisse.internal.model.SelectedItemCollection;
 import com.zhihu.matisse.internal.ui.adapter.AlbumMediaAdapter;
 import com.zhihu.matisse.internal.ui.widget.MediaGridInset;
 import com.zhihu.matisse.internal.utils.UIUtils;
+import com.zhihu.matisse.ui.MatisseActivity;
 
 public class MediaSelectionFragment extends Fragment implements
         AlbumMediaCollection.AlbumMediaCallbacks, AlbumMediaAdapter.CheckStateListener,
@@ -109,6 +110,7 @@ public class MediaSelectionFragment extends Fragment implements
         int spacing = getResources().getDimensionPixelSize(R.dimen.media_grid_spacing);
         mRecyclerView.addItemDecoration(new MediaGridInset(spanCount, spacing, false));
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnScrollListener(rvScrollListener);
         mAlbumMediaCollection.onCreate(getActivity(), this);
         mAlbumMediaCollection.load(album, selectionSpec.capture);
     }
@@ -152,6 +154,23 @@ public class MediaSelectionFragment extends Fragment implements
                     item, adapterPosition);
         }
     }
+
+    RecyclerView.OnScrollListener rvScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+	            SelectionSpec.getInstance().imageEngine.pauseLoad(getActivity(), MatisseActivity.LOAD_TAG);
+            } else {
+	            SelectionSpec.getInstance().imageEngine.resumeLoad(getActivity(), MatisseActivity.LOAD_TAG);
+            }
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+        }
+    };
 
     public interface SelectionProvider {
         SelectedItemCollection provideSelectedItemCollection();

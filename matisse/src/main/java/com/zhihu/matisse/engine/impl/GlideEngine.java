@@ -82,7 +82,17 @@ public class GlideEngine implements ImageEngine {
                 .into(imageView);
     }
 
-    @Override
+	@Override
+	public void pauseLoad(Context context, String tag) {
+		Glide.with(context).pauseRequests();
+	}
+
+	@Override
+	public void resumeLoad(Context context, String tag) {
+		Glide.with(context).resumeRequests();
+	}
+
+	@Override
     public boolean supportAnimatedGif() {
         return true;
     }

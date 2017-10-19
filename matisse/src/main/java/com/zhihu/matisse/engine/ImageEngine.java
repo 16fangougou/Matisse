@@ -75,6 +75,16 @@ public interface ImageEngine {
     void loadGifImage(Context context, int resizeX, int resizeY, ImageView imageView, Uri uri);
 
     /**
+     * 暂停加载
+     */
+    void pauseLoad(Context context, String tag);
+
+    /**
+     * 恢复加载
+     */
+    void resumeLoad(Context context, String tag);
+
+    /**
      * Whether this implementation supports animated gif.
      * Just knowledge of it, convenient for users.
      *
