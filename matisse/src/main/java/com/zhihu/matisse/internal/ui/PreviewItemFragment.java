@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.shizhefei.view.largeimage.LargeImageView;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Item;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
@@ -77,20 +77,22 @@ public class PreviewItemFragment extends Fragment {
             videoPlayButton.setVisibility(View.GONE);
         }
 
-        LargeImageView image = (LargeImageView)view.findViewById(R.id.image_view);
+        SubsamplingScaleImageView scaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.image_view_sub);
+        scaleImageView.setOrientation(SubsamplingScaleImageView.ORIENTATION_USE_EXIF);// 自动旋转
+        scaleImageView.setDoubleTapZoomDuration(200);// 放大动画时长
+	    scaleImageView.setDoubleTapZoomDpi(300);// 双击放大的比例
         ImageView imageViewGif = (ImageView) view.findViewById(R.id.image_view_gif);
 
-        image.setEnabled(true);
         Point size = PhotoMetadataUtils.getBitmapSize(item.getContentUri(), getActivity());
         if (item.isGif()) {
-            image.setVisibility(View.GONE);
+            scaleImageView.setVisibility(View.GONE);
             imageViewGif.setVisibility(View.VISIBLE);
             SelectionSpec.getInstance().imageEngine.loadGifImage(getContext(), size.x, size.y, imageViewGif,
                     item.getContentUri());
         } else {
             imageViewGif.setVisibility(View.GONE);
-            image.setVisibility(View.VISIBLE);
-            SelectionSpec.getInstance().imageEngine.loadImage(getContext(), size.x, size.y, image,
+            scaleImageView.setVisibility(View.VISIBLE);
+            SelectionSpec.getInstance().imageEngine.loadImage(getContext(), size.x, size.y, scaleImageView,
                     item.getContentUri());
         }
     }
@@ -99,10 +101,5 @@ public class PreviewItemFragment extends Fragment {
         if (getView() != null) {
 
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 }

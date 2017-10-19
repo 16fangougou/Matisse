@@ -18,8 +18,8 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <com.shizhefei.view.largeimage.LargeImageView
-        android:id="@+id/image_view"
+    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+        android:id="@+id/image_view_sub"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
