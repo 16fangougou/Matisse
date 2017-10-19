@@ -23,13 +23,11 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.shizhefei.view.largeimage.LargeImageView;
-import com.shizhefei.view.largeimage.factory.FileBitmapDecoderFactory;
 import com.zhihu.matisse.engine.ImageEngine;
-
-import java.io.File;
 
 /**
  * {@link ImageEngine} implementation using Glide.
@@ -61,13 +59,15 @@ public class GlideEngine implements ImageEngine {
     }
 
     @Override
-    public void loadImage(Context context, int resizeX, int resizeY, final LargeImageView imageView, Uri uri) {
+    public void loadImage(Context context, final int resizeX, int resizeY, final LargeImageView imageView, Uri uri) {
         Glide.with(context)
                 .load(uri)
-		        .downloadOnly(new ViewTarget<LargeImageView, File>(imageView) {
+		        .into(new ViewTarget<LargeImageView, GlideDrawable>(imageView) {
+
 			        @Override
-			        public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-				        imageView.setImage(new FileBitmapDecoderFactory(resource));
+			        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable>
+					        glideAnimation) {
+				        imageView.setImage(resource);
 			        }
 		        });
     }

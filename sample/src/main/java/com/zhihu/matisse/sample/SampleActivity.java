@@ -33,7 +33,6 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
-import com.zhihu.matisse.engine.impl.PicassoEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
@@ -92,11 +91,19 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                                     break;
                                 case R.id.dracula:
                                     Matisse.from(SampleActivity.this)
-                                            .choose(MimeType.ofImage())
-                                            .theme(R.style.Matisse_Dracula)
-                                            .countable(false)
+                                            .choose(MimeType.ofAll(), false)
+                                            .countable(true)
+                                            .capture(true)
+                                            .captureStrategy(
+                                                    new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider"))
                                             .maxSelectable(9)
-                                            .imageEngine(new PicassoEngine())
+                                            .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
+                                            .gridExpectedSize(
+                                                    getResources().getDimensionPixelSize(R.dimen.grid_expected_size))
+                                            .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                                            .thumbnailScale(0.85f)
+                                            .imageEngine(new GlideEngine())
+                                            .theme(R.style.Matisse_Dracula)
                                             .forResult(REQUEST_CODE_CHOOSE);
                                     break;
                             }
