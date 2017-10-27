@@ -16,12 +16,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
-        minSdkVersion 11
-        targetSdkVersion 25
+        minSdkVersion 14
+        targetSdkVersion 22
+        compileSdkVersion 26
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -32,16 +33,14 @@ android {
     }
 }
 
-ext.supportLibVersion = '25.3.1'
+ext.supportLibVersion = '26.1.0'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile "com.android.support:support-v4:${supportLibVersion}"
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
-
     provided 'com.github.bumptech.glide:glide:3.8.0'
-    compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
+    compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.7.2'
 }
