@@ -44,6 +44,7 @@ public final class SelectionSpec {
     public int spanCount;
     public int gridExpectedSize;
     public float thumbnailScale;
+    public boolean showUseOrigin;
     public ImageEngine imageEngine;
 
     private SelectionSpec() {
@@ -73,6 +74,7 @@ public final class SelectionSpec {
         spanCount = 3;
         gridExpectedSize = 0;
         thumbnailScale = 0.5f;
+        showUseOrigin = false;
         imageEngine = new GlideEngine();
     }
 

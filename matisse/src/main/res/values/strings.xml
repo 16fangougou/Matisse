@@ -18,6 +18,8 @@
     <string name="album_name_all">All Media</string>
 
     <string name="button_preview">Preview</string>
+    <string name="button_origin">Origin(%1$.2fMB)</string>
+    <string name="button_origin_default">Origin</string>
     <string name="button_apply_default">Apply</string>
     <string name="button_apply">Apply(%1$d)</string>
     <string name="button_back">Back</string>

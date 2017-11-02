@@ -61,6 +61,19 @@
             android:textColor="?attr/bottomToolbar.preview.textColor"
             android:textSize="16sp"/>
 
+        <CheckBox
+            android:id="@+id/button_origin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:foreground="?selectableItemBackground"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@string/button_origin"
+            android:textColor="?attr/bottomToolbar.preview.textColor"
+            android:textSize="16sp"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/button_apply"
             android:layout_width="wrap_content"
@@ -68,6 +81,7 @@
             android:layout_gravity="end"
             android:foreground="?selectableItemBackground"
             android:padding="16dp"
+            android:text="@string/button_apply"
             android:textColor="?attr/bottomToolbar.apply.textColor"
             android:textSize="16sp"/>
     </FrameLayout>

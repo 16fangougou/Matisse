@@ -18,6 +18,8 @@
     <string name="album_name_all">全部</string>
 
     <string name="button_preview">预览</string>
+    <string name="button_origin">原图(%1$.2fMB)</string>
+    <string name="button_origin_default">原图</string>
     <string name="button_apply_default">使用</string>
     <string name="button_apply">使用(%1$d)</string>
     <string name="button_back">返回</string>

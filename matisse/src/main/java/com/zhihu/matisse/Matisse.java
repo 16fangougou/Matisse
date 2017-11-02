@@ -127,6 +127,15 @@ public final class Matisse {
         return new SelectionCreator(this, mimeTypes, mediaTypeExclusive);
     }
 
+    /**
+     * 返回是否使用原图
+     * @param data
+     * @return
+     */
+    public static boolean useOriginImage(Intent data) {
+        return data.getBooleanExtra(MatisseActivity.EXTRA_RESULT_USE_ORIGIN, false);
+    }
+
     @Nullable
     Activity getActivity() {
         return mContext.get();

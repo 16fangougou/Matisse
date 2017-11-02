@@ -263,6 +263,16 @@ public final class SelectionCreator {
     }
 
     /**
+     * 是否显示使用原图按钮，默认不显示
+     * @param show
+     * @return
+     */
+    public SelectionCreator showUseOrigin(boolean show) {
+        mSelectionSpec.showUseOrigin = show;
+        return this;
+    }
+
+    /**
      * Start to select media and wait for result.
      *
      * @param requestCode Identity of the request Activity or Fragment.

@@ -34,6 +34,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.gyf.barlibrary.ImmersionBar;
@@ -53,7 +55,9 @@ import com.zhihu.matisse.internal.ui.widget.AlbumsSpinner;
 import com.zhihu.matisse.internal.utils.MediaStoreCompat;
 import com.zhihu.matisse.internal.utils.PathUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main Activity to display albums and media content (images/videos) in each album
@@ -63,10 +67,11 @@ public class MatisseActivity extends AppCompatActivity implements
         AlbumCollection.AlbumCallbacks, AdapterView.OnItemSelectedListener,
         MediaSelectionFragment.SelectionProvider, View.OnClickListener,
         AlbumMediaAdapter.CheckStateListener, AlbumMediaAdapter.OnMediaClickListener,
-        AlbumMediaAdapter.OnPhotoCapture {
+        AlbumMediaAdapter.OnPhotoCapture, CompoundButton.OnCheckedChangeListener {
 
     public static final String EXTRA_RESULT_SELECTION = "extra_result_selection";
     public static final String EXTRA_RESULT_SELECTION_PATH = "extra_result_selection_path";
+    public static final String EXTRA_RESULT_USE_ORIGIN = "extra_result_use_origin";
     public static final String LOAD_TAG = "load_tag_zhihu";
     private static final int REQUEST_CODE_PREVIEW = 23;
     private static final int REQUEST_CODE_CAPTURE = 24;
@@ -74,11 +79,13 @@ public class MatisseActivity extends AppCompatActivity implements
     private MediaStoreCompat mMediaStoreCompat;
     private SelectedItemCollection mSelectedCollection = new SelectedItemCollection(this);
     private SelectionSpec mSpec;
+    private boolean booleanUseOrigin = false;
     private ImmersionBar mImmersionBar;
 
     private AlbumsSpinner mAlbumsSpinner;
     private AlbumsAdapter mAlbumsAdapter;
     private TextView mButtonPreview;
+    private CheckBox mButtonOrigin;
     private TextView mButtonApply;
     private View mContainer;
     private View mEmptyView;
@@ -124,8 +131,10 @@ public class MatisseActivity extends AppCompatActivity implements
         navigationIcon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
+        mButtonOrigin = (CheckBox) findViewById(R.id.button_origin);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
         mButtonPreview.setOnClickListener(this);
+        mButtonOrigin.setOnCheckedChangeListener(this);
         mButtonApply.setOnClickListener(this);
         mContainer = findViewById(R.id.container);
         mEmptyView = findViewById(R.id.empty_view);
@@ -232,6 +241,34 @@ public class MatisseActivity extends AppCompatActivity implements
 
     private void updateBottomToolbar() {
         int selectedCount = mSelectedCollection.count();
+
+        if (mSpec.showUseOrigin) {
+	        List<Item> items =  mSelectedCollection.getDataWithBundle()
+			        .getParcelableArrayList(SelectedItemCollection.STATE_SELECTION);
+	        if (items != null && items.size() > 0) {
+		        try {
+			        double allSelectedSize = 0;
+			        for (Item item : items) {
+				        allSelectedSize = allSelectedSize + item.size;
+			        }
+			        double f0 = allSelectedSize / (1024 * 1024);
+			        BigDecimal bg = new BigDecimal(f0);
+			        double doubleSize = bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+			        mButtonOrigin.setVisibility(View.VISIBLE);
+			        if (booleanUseOrigin) {
+				        mButtonOrigin.setText(getString(R.string.button_origin, doubleSize));
+			        } else {
+				        mButtonOrigin.setText(getString(R.string.button_origin_default));
+			        }
+		        } catch (Exception e) {
+			        mButtonOrigin.setVisibility(View.GONE);
+		        }
+	        } else {
+		        mButtonOrigin.setVisibility(View.GONE);
+	        }
+        }
+
         if (selectedCount == 0) {
             mButtonPreview.setEnabled(false);
             mButtonApply.setEnabled(false);
@@ -259,6 +296,7 @@ public class MatisseActivity extends AppCompatActivity implements
             result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
             ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
             result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
+            result.putExtra(EXTRA_RESULT_USE_ORIGIN, booleanUseOrigin);
             setResult(RESULT_OK, result);
             finish();
         }
@@ -346,5 +384,21 @@ public class MatisseActivity extends AppCompatActivity implements
         if (mMediaStoreCompat != null) {
             mMediaStoreCompat.dispatchCaptureIntent(this, REQUEST_CODE_CAPTURE);
         }
+    }
+
+    /**
+     * Called when the checked state of a compound button has changed.
+     *
+     * @param buttonView The compound button view whose state has changed.
+     * @param isChecked  The new checked state of buttonView.
+     */
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    	if (isChecked) {
+		    booleanUseOrigin = true;
+	    } else {
+		    booleanUseOrigin = false;
+	    }
+	    updateBottomToolbar();
     }
 }
