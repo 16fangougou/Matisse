@@ -80,7 +80,8 @@ public class PreviewItemFragment extends Fragment {
         SubsamplingScaleImageView scaleImageView = (SubsamplingScaleImageView) view.findViewById(R.id.image_view_sub);
         scaleImageView.setOrientation(SubsamplingScaleImageView.ORIENTATION_USE_EXIF);// 自动旋转
         scaleImageView.setDoubleTapZoomDuration(200);// 放大动画时长
-	    scaleImageView.setDoubleTapZoomDpi(300);// 双击放大的比例
+        scaleImageView.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER);
+
         ImageView imageViewGif = (ImageView) view.findViewById(R.id.image_view_gif);
 
         Point size = PhotoMetadataUtils.getBitmapSize(item.getContentUri(), getActivity());

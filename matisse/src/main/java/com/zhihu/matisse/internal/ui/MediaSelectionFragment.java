@@ -159,10 +159,11 @@ public class MediaSelectionFragment extends Fragment implements
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
-            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
-	            SelectionSpec.getInstance().imageEngine.pauseLoad(getActivity(), MatisseActivity.LOAD_TAG);
-            } else {
+            // 不滚动时再加载图片
+            if (newState == RecyclerView.SCROLL_STATE_IDLE || newState == RecyclerView.SCROLL_STATE_DRAGGING) {
 	            SelectionSpec.getInstance().imageEngine.resumeLoad(getActivity(), MatisseActivity.LOAD_TAG);
+            } else {
+	            SelectionSpec.getInstance().imageEngine.pauseLoad(getActivity(), MatisseActivity.LOAD_TAG);
             }
         }
 

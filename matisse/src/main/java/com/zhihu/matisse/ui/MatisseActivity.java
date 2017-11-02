@@ -36,6 +36,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import com.gyf.barlibrary.ImmersionBar;
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
@@ -73,6 +74,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private MediaStoreCompat mMediaStoreCompat;
     private SelectedItemCollection mSelectedCollection = new SelectedItemCollection(this);
     private SelectionSpec mSpec;
+    private ImmersionBar mImmersionBar;
 
     private AlbumsSpinner mAlbumsSpinner;
     private AlbumsAdapter mAlbumsAdapter;
@@ -87,6 +89,15 @@ public class MatisseActivity extends AppCompatActivity implements
         mSpec = SelectionSpec.getInstance();
         setTheme(mSpec.themeId);
         super.onCreate(savedInstanceState);
+
+        /**
+         * 沉浸式状态栏
+         */
+        mImmersionBar = ImmersionBar.with(this);
+        mImmersionBar.fitsSystemWindows(true)  //使用该属性,必须指定状态栏颜色
+                .statusBarColor(R.color.zhihu_27a0c9)// 指定状态栏颜色
+                .statusBarDarkFont(false);
+        mImmersionBar.init();   //所有子类都将继承这些相同的属性
 
         setContentView(R.layout.activity_matisse);
 
@@ -144,6 +155,11 @@ public class MatisseActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mAlbumCollection.onDestroy();
+	    if (mImmersionBar != null) {
+		    //必须调用该方法，防止内存泄漏，不调用该方法，如果界面bar发生改变，
+		    // 在不关闭app的情况下，退出此界面再进入将记忆最后一次bar改变的状态
+		    mImmersionBar.destroy();
+	    }
     }
 
     @Override
