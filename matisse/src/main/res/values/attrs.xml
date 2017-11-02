@@ -26,6 +26,7 @@
     <attr name="page.bg" format="reference|color"/>
     <attr name="bottomToolbar.bg" format="reference|color"/>
     <attr name="bottomToolbar.preview.textColor" format="reference|color"/>
+    <attr name="bottomToolbar.origin.textColor" format="reference|color"/>
     <attr name="bottomToolbar.apply.textColor" format="reference|color"/>
     <attr name="preview.bottomToolbar.back.textColor" format="reference|color"/>
     <attr name="preview.bottomToolbar.apply.textColor" format="reference|color"/>

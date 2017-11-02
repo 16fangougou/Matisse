@@ -34,8 +34,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.gyf.barlibrary.ImmersionBar;
@@ -52,6 +51,7 @@ import com.zhihu.matisse.internal.ui.SelectedPreviewActivity;
 import com.zhihu.matisse.internal.ui.adapter.AlbumMediaAdapter;
 import com.zhihu.matisse.internal.ui.adapter.AlbumsAdapter;
 import com.zhihu.matisse.internal.ui.widget.AlbumsSpinner;
+import com.zhihu.matisse.internal.ui.widget.CheckView;
 import com.zhihu.matisse.internal.utils.MediaStoreCompat;
 import com.zhihu.matisse.internal.utils.PathUtils;
 
@@ -67,7 +67,7 @@ public class MatisseActivity extends AppCompatActivity implements
         AlbumCollection.AlbumCallbacks, AdapterView.OnItemSelectedListener,
         MediaSelectionFragment.SelectionProvider, View.OnClickListener,
         AlbumMediaAdapter.CheckStateListener, AlbumMediaAdapter.OnMediaClickListener,
-        AlbumMediaAdapter.OnPhotoCapture, CompoundButton.OnCheckedChangeListener {
+        AlbumMediaAdapter.OnPhotoCapture {
 
     public static final String EXTRA_RESULT_SELECTION = "extra_result_selection";
     public static final String EXTRA_RESULT_SELECTION_PATH = "extra_result_selection_path";
@@ -85,7 +85,9 @@ public class MatisseActivity extends AppCompatActivity implements
     private AlbumsSpinner mAlbumsSpinner;
     private AlbumsAdapter mAlbumsAdapter;
     private TextView mButtonPreview;
-    private CheckBox mButtonOrigin;
+    private LinearLayout mButtonOriginAll;
+    private CheckView mButtonOriginCheckView;
+    private TextView mButtonOriginTextView;
     private TextView mButtonApply;
     private View mContainer;
     private View mEmptyView;
@@ -102,8 +104,14 @@ public class MatisseActivity extends AppCompatActivity implements
          */
         mImmersionBar = ImmersionBar.with(this);
         mImmersionBar.fitsSystemWindows(true)  //使用该属性,必须指定状态栏颜色
-                .statusBarColor(R.color.zhihu_27a0c9)// 指定状态栏颜色
                 .statusBarDarkFont(false);
+        if (mSpec.themeId == R.style.Matisse_Zhihu) {
+            mImmersionBar.statusBarColor(R.color.zhihu_primary);// 指定状态栏颜色
+        } else if (mSpec.themeId == R.style.Matisse_Dracula) {
+            mImmersionBar.statusBarColor(R.color.dracula_primary);// 指定状态栏颜色
+        } else {
+	        mImmersionBar.statusBarColor(R.color.zhihu_27a0c9);// 指定状态栏颜色
+        }
         mImmersionBar.init();   //所有子类都将继承这些相同的属性
 
         setContentView(R.layout.activity_matisse);
@@ -131,10 +139,14 @@ public class MatisseActivity extends AppCompatActivity implements
         navigationIcon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
-        mButtonOrigin = (CheckBox) findViewById(R.id.button_origin);
+	    mButtonOriginAll = (LinearLayout) findViewById(R.id.button_origin_all);
+	    mButtonOriginCheckView = (CheckView) findViewById(R.id.button_origin_checkview);
+	    mButtonOriginTextView = (TextView) findViewById(R.id.button_origin_textview);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
-        mButtonPreview.setOnClickListener(this);
-        mButtonOrigin.setOnCheckedChangeListener(this);
+	    mButtonOriginAll.setOnClickListener(this);
+        mButtonOriginCheckView.setCountable(false);
+        mButtonOriginCheckView.setOnClickListener(this);
+	    mButtonPreview.setOnClickListener(this);
         mButtonApply.setOnClickListener(this);
         mContainer = findViewById(R.id.container);
         mEmptyView = findViewById(R.id.empty_view);
@@ -255,17 +267,17 @@ public class MatisseActivity extends AppCompatActivity implements
 			        BigDecimal bg = new BigDecimal(f0);
 			        double doubleSize = bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 
-			        mButtonOrigin.setVisibility(View.VISIBLE);
+			        mButtonOriginAll.setVisibility(View.VISIBLE);
 			        if (booleanUseOrigin) {
-				        mButtonOrigin.setText(getString(R.string.button_origin, doubleSize));
+				        mButtonOriginTextView.setText(getString(R.string.button_origin, doubleSize));
 			        } else {
-				        mButtonOrigin.setText(getString(R.string.button_origin_default));
+				        mButtonOriginTextView.setText(getString(R.string.button_origin_default));
 			        }
 		        } catch (Exception e) {
-			        mButtonOrigin.setVisibility(View.GONE);
+			        mButtonOriginAll.setVisibility(View.GONE);
 		        }
 	        } else {
-		        mButtonOrigin.setVisibility(View.GONE);
+		        mButtonOriginAll.setVisibility(View.GONE);
 	        }
         }
 
@@ -299,6 +311,12 @@ public class MatisseActivity extends AppCompatActivity implements
             result.putExtra(EXTRA_RESULT_USE_ORIGIN, booleanUseOrigin);
             setResult(RESULT_OK, result);
             finish();
+        } else if (v.getId() == R.id.button_origin_all
+		        || v.getId() == R.id.button_origin_checkview
+		        || v.getId() == R.id.button_origin_textview) {
+            mButtonOriginCheckView.setChecked(!booleanUseOrigin);
+            booleanUseOrigin = !booleanUseOrigin;
+	        updateBottomToolbar();
         }
     }
 
@@ -384,21 +402,5 @@ public class MatisseActivity extends AppCompatActivity implements
         if (mMediaStoreCompat != null) {
             mMediaStoreCompat.dispatchCaptureIntent(this, REQUEST_CODE_CAPTURE);
         }
-    }
-
-    /**
-     * Called when the checked state of a compound button has changed.
-     *
-     * @param buttonView The compound button view whose state has changed.
-     * @param isChecked  The new checked state of buttonView.
-     */
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-    	if (isChecked) {
-		    booleanUseOrigin = true;
-	    } else {
-		    booleanUseOrigin = false;
-	    }
-	    updateBottomToolbar();
     }
 }

@@ -14,11 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<resources>
-
-    <color name="preview_bottom_toolbar_bg">#CC000000</color>
-    <color name="preview_bottom_size">#61FFFFFF</color>
-    <color name="zhihu_27a0c9">#27A0C9</color>
-    <color name="white">#FFFFFF</color>
-
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/zhihu_bottom_toolbar_preview_text_disable"
+          android:state_enabled="false"/>
+    <item android:color="@color/zhihu_bottom_toolbar_preview_text"/>
+</selector>
