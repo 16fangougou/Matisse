@@ -105,6 +105,7 @@ public class MatisseActivity extends AppCompatActivity implements
         mImmersionBar = ImmersionBar.with(this);
         mImmersionBar.fitsSystemWindows(true)  //使用该属性,必须指定状态栏颜色
                 .navigationBarColor(R.color.white)
+                .navigationBarAlpha(0.2f)  //导航栏透明度，不写默认0.0F
                 .statusBarDarkFont(false);
         if (mSpec.themeId == R.style.Matisse_Zhihu) {
             mImmersionBar.statusBarColor(R.color.zhihu_primary);// 指定状态栏颜色
