@@ -167,7 +167,7 @@ public class SelectedItemCollection {
 
     public IncapableCause isAcceptable(Item item) {
         if (maxSelectableReached()) {
-            int maxSelectable = SelectionSpec.getInstance().maxSelectable;
+            int maxSelectable = currentMaxSelectable();
             String cause;
             cause = mContext.getString(
                     R.string.error_over_count,
@@ -182,7 +182,21 @@ public class SelectedItemCollection {
     }
 
     public boolean maxSelectableReached() {
-        return mItems.size() == SelectionSpec.getInstance().maxSelectable;
+        return mItems.size() == currentMaxSelectable();
+    }
+
+    // depends
+    private int currentMaxSelectable() {
+        SelectionSpec spec = SelectionSpec.getInstance();
+        if (spec.maxSelectable > 0) {
+            return spec.maxSelectable;
+        } else if (mCollectionType == COLLECTION_IMAGE) {
+            return spec.maxImageSelectable;
+        } else if (mCollectionType == COLLECTION_VIDEO) {
+            return spec.maxVideoSelectable;
+        } else {
+            return spec.maxSelectable;
+        }
     }
 
     public int getCollectionType() {
