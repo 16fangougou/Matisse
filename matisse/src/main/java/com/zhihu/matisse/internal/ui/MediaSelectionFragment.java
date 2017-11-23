@@ -17,6 +17,7 @@ package com.zhihu.matisse.internal.ui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -159,6 +160,15 @@ public class MediaSelectionFragment extends Fragment implements
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
+            if (Build.VERSION.SDK_INT >= 17) {
+                if (getActivity().isDestroyed() || getActivity() == null) {
+                    return;
+                }
+            } else {
+                if (getActivity().isFinishing() || getActivity() == null) {
+                    return;
+                }
+            }
             // 不滚动时再加载图片
             if (newState == RecyclerView.SCROLL_STATE_IDLE || newState == RecyclerView.SCROLL_STATE_DRAGGING) {
 	            SelectionSpec.getInstance().imageEngine.resumeLoad(getActivity(), MatisseActivity.LOAD_TAG);
