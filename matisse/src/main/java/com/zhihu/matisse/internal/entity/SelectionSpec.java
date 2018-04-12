@@ -24,6 +24,7 @@ import com.zhihu.matisse.R;
 import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.listener.OnSelectedListener;
 
 import java.util.List;
 import java.util.Set;
@@ -48,6 +49,7 @@ public final class SelectionSpec {
     public float thumbnailScale;
     public boolean showUseOrigin;
     public ImageEngine imageEngine;
+    public OnSelectedListener onSelectedListener;
 
     private SelectionSpec() {
     }
