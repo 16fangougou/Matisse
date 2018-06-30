@@ -30,6 +30,7 @@ import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
+import com.zhihu.matisse.listener.OnCheckedListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
 import com.zhihu.matisse.ui.MatisseActivity;
 
@@ -202,6 +203,28 @@ public final class SelectionCreator {
     }
 
     /**
+     * Show a original photo check options.Let users decide whether use original photo after select
+     *
+     * @param enable Whether to enable original photo or not
+     * @return {@link SelectionCreator} for fluent API.
+     */
+    public SelectionCreator originalEnable(boolean enable) {
+        mSelectionSpec.originalable = enable;
+        return this;
+    }
+
+    /**
+     * Maximum original size,the unit is MB. Only useful when {link@originalEnable} set true
+     *
+     * @param size Maximum original size. Default value is Integer.MAX_VALUE
+     * @return {@link SelectionCreator} for fluent API.
+     */
+    public SelectionCreator maxOriginalSize(int size) {
+        mSelectionSpec.originalMaxSize = size;
+        return this;
+    }
+
+    /**
      * Capture strategy provided for the location to save photos including internal and external
      * storage and also a authority for {@link android.support.v4.content.FileProvider}.
      *
@@ -284,16 +307,6 @@ public final class SelectionCreator {
     }
 
     /**
-     * 是否显示使用原图按钮，默认不显示
-     * @param show
-     * @return
-     */
-    public SelectionCreator showUseOrigin(boolean show) {
-        mSelectionSpec.showUseOrigin = show;
-        return this;
-    }
-
-    /**
      * Set listener for callback immediately when user select or unselect something.
      * <p>
      * It's a redundant API with {@link Matisse#obtainResult(Intent)},
@@ -305,6 +318,17 @@ public final class SelectionCreator {
     @NonNull
     public SelectionCreator setOnSelectedListener(@Nullable OnSelectedListener listener) {
         mSelectionSpec.onSelectedListener = listener;
+        return this;
+    }
+
+    /**
+     * Set listener for callback immediately when user check or uncheck original.
+     *
+     * @param listener {@link OnSelectedListener}
+     * @return {@link SelectionCreator} for fluent API.
+     */
+    public SelectionCreator setOnCheckedListener(@Nullable OnCheckedListener listener) {
+        mSelectionSpec.onCheckedListener = listener;
         return this;
     }
 

@@ -23,10 +23,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
@@ -161,11 +161,11 @@ public class MediaSelectionFragment extends Fragment implements
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
             if (Build.VERSION.SDK_INT >= 17) {
-                if (getActivity().isDestroyed() || getActivity() == null) {
+                if (getActivity() == null || getActivity().isDestroyed()) {
                     return;
                 }
             } else {
-                if (getActivity().isFinishing() || getActivity() == null) {
+                if (getActivity() == null || getActivity().isFinishing()) {
                     return;
                 }
             }

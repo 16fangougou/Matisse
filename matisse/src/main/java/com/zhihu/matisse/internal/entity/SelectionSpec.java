@@ -24,6 +24,7 @@ import com.zhihu.matisse.R;
 import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.listener.OnCheckedListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
 
 import java.util.List;
@@ -47,9 +48,12 @@ public final class SelectionSpec {
     public int spanCount;
     public int gridExpectedSize;
     public float thumbnailScale;
-    public boolean showUseOrigin;
     public ImageEngine imageEngine;
+    public boolean hasInited;
     public OnSelectedListener onSelectedListener;
+    public boolean originalable;
+    public int originalMaxSize;
+    public OnCheckedListener onCheckedListener;
 
     private SelectionSpec() {
     }
@@ -80,8 +84,10 @@ public final class SelectionSpec {
         spanCount = 3;
         gridExpectedSize = 0;
         thumbnailScale = 0.5f;
-        showUseOrigin = false;
         imageEngine = new GlideEngine();
+        hasInited = true;
+        originalable = false;
+        originalMaxSize = Integer.MAX_VALUE;
     }
 
     public boolean singleSelectionModeEnabled() {

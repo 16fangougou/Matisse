@@ -37,6 +37,7 @@ public class SelectedItemCollection {
 
     public static final String STATE_SELECTION = "state_selection";
     public static final String STATE_COLLECTION_TYPE = "state_collection_type";
+
     /**
      * Empty collection
      */

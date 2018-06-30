@@ -21,6 +21,7 @@ import android.support.annotation.Nullable;
 
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
+import com.zhihu.matisse.internal.entity.SelectionSpec;
 import com.zhihu.matisse.internal.model.AlbumMediaCollection;
 import com.zhihu.matisse.internal.ui.adapter.PreviewPagerAdapter;
 
@@ -40,7 +41,11 @@ public class AlbumPreviewActivity extends BasePreviewActivity implements
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        if (!SelectionSpec.getInstance().hasInited) {
+            setResult(RESULT_CANCELED);
+            finish();
+            return;
+        }
         mCollection.onCreate(this, this);
         Album album = getIntent().getParcelableExtra(EXTRA_ALBUM);
         mCollection.load(album);
@@ -62,10 +67,19 @@ public class AlbumPreviewActivity extends BasePreviewActivity implements
 
     @Override
     public void onAlbumMediaLoad(Cursor cursor) {
+        if (cursor.isClosed()) {
+            return;
+        }
         List<Item> items = new ArrayList<>();
         while (cursor.moveToNext()) {
             items.add(Item.valueOf(cursor));
         }
+        cursor.close();
+
+        if (items.isEmpty()) {
+            return;
+        }
+
         PreviewPagerAdapter adapter = (PreviewPagerAdapter) mPager.getAdapter();
         adapter.addAll(items);
         adapter.notifyDataSetChanged();
