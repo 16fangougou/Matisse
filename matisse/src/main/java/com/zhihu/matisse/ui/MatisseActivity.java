@@ -119,8 +119,9 @@ public class MatisseActivity extends AppCompatActivity implements
 
         if (mSpec.capture) {
             mMediaStoreCompat = new MediaStoreCompat(this);
-            if (mSpec.captureStrategy == null)
+            if (mSpec.captureStrategy == null) {
                 throw new RuntimeException("Don't forget to set CaptureStrategy.");
+            }
             mMediaStoreCompat.setCaptureStrategy(mSpec.captureStrategy);
         }
 
@@ -198,8 +199,9 @@ public class MatisseActivity extends AppCompatActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK)
+        if (resultCode != RESULT_OK) {
             return;
+        }
 
         if (requestCode == REQUEST_CODE_PREVIEW) {
             Bundle resultBundle = data.getBundleExtra(BasePreviewActivity.EXTRA_RESULT_BUNDLE);
@@ -251,13 +253,11 @@ public class MatisseActivity extends AppCompatActivity implements
                 MatisseActivity.this.revokeUriPermission(contentUri,
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
-
             new SingleMediaScanner(this.getApplicationContext(), path, new SingleMediaScanner.ScanListener() {
                 @Override public void onScanFinish() {
                     Log.i("SingleMediaScanner", "scan finish!");
                 }
             });
-
             finish();
         }
     }

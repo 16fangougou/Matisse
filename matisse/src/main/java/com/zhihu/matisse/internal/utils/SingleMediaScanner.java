@@ -7,39 +7,38 @@ import android.net.Uri;
 /**
  * @author 工藤
  * @email gougou@16fan.com
- * com.zhihu.matisse.internal.utils
- * create at 2018/10/23  11:32
- * description:通知系统扫描媒体文件
+ * create at 2018年10月23日12:17:59
+ * description:媒体扫描
  */
 public class SingleMediaScanner implements MediaScannerConnection.MediaScannerConnectionClient {
 
-	private MediaScannerConnection mMs;
-	private String path;
-	private ScanListener listener;
+    private MediaScannerConnection mMsc;
+    private String mPath;
+    private ScanListener mListener;
 
-	public interface ScanListener {
+    public interface ScanListener {
 
-		/**
-		 * 扫描结束的回调
-		 */
-		void onScanFinish();
-	}
+        /**
+         * scan finish
+         */
+        void onScanFinish();
+    }
 
-	public SingleMediaScanner(Context context, String path, ScanListener l) {
-		this.path = path;
-		this.listener = l;
-		this.mMs = new MediaScannerConnection(context, this);
-		this.mMs.connect();
-	}
+    public SingleMediaScanner(Context context, String mPath, ScanListener mListener) {
+        this.mPath = mPath;
+        this.mListener = mListener;
+        this.mMsc = new MediaScannerConnection(context, this);
+        this.mMsc.connect();
+    }
 
-	@Override public void onMediaScannerConnected() {
-		mMs.scanFile(path, null);
-	}
+    @Override public void onMediaScannerConnected() {
+        mMsc.scanFile(mPath, null);
+    }
 
-	@Override public void onScanCompleted(String path, Uri uri) {
-		mMs.disconnect();
-		if (listener != null) {
-			listener.onScanFinish();
-		}
-	}
+    @Override public void onScanCompleted(String mPath, Uri mUri) {
+        mMsc.disconnect();
+        if (mListener != null) {
+            mListener.onScanFinish();
+        }
+    }
 }
