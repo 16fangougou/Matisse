@@ -232,9 +232,18 @@ public final class PhotoMetadataUtils {
         return new int[] { srcWidth, srcHeight };
     }
 
-    public static boolean isLongImage(String imagePath, int longImageRatio) {
+    public static boolean isLongImage(String imagePath) {
         int[] wh = getWidthHeight(imagePath);
-        return wh[0] > 0 && wh[1] > 0 && Math.max(wh[0], wh[1]) / Math.min(wh[0], wh[1]) >= longImageRatio;
+        int w = wh[0];
+        int h = wh[1];
+        return w > 0 && h > 0 && h > w && h / w >= 3;
+    }
+
+    public static boolean iWidthImage(String imagePath) {
+        int[] wh = getWidthHeight(imagePath);
+        int w = wh[0];
+        int h = wh[1];
+        return w > 0 && h > 0 && w > h && w / h >= 3;
     }
 
     public static int getOrientation(String imagePath) {

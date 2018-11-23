@@ -40,6 +40,7 @@ import com.zhihu.matisse.internal.ui.widget.CheckView;
 import com.zhihu.matisse.internal.ui.widget.IncapableDialog;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 import com.zhihu.matisse.internal.utils.Platform;
+import com.zhihu.matisse.internal.utils.UIUtils;
 import com.zhihu.matisse.listener.OnFragmentInteractionListener;
 
 public abstract class BasePreviewActivity extends AppCompatActivity implements View.OnClickListener,

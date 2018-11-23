@@ -22,6 +22,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.davemorrissey.labs.subscaleview.ImageSource;
@@ -65,7 +66,7 @@ public class GlideEngine implements ImageEngine {
             .load(uri)
             .downloadOnly(new SimpleTarget<File>() {
                 @Override public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                    if (PhotoMetadataUtils.isLongImage(resource.getAbsolutePath(), 3)) {
+                    if (PhotoMetadataUtils.isLongImage(resource.getAbsolutePath())) {
                         imageView.setOrientation(PhotoMetadataUtils.getOrientation(resource.getAbsolutePath()));
                         imageView.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_START);
                     }
@@ -79,8 +80,8 @@ public class GlideEngine implements ImageEngine {
         Glide.with(context)
                 .load(uri)
                 .asGif()
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .override(resizeX, resizeY)
-                .priority(Priority.HIGH)
                 .into(imageView);
     }
 
@@ -88,5 +89,4 @@ public class GlideEngine implements ImageEngine {
     public boolean supportAnimatedGif() {
         return true;
     }
-
 }

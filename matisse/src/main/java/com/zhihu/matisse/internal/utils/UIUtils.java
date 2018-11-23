@@ -16,6 +16,8 @@
 package com.zhihu.matisse.internal.utils;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 public class UIUtils {
 
@@ -29,4 +31,20 @@ public class UIUtils {
         return spanCount;
     }
 
+    public static boolean isWiFi(Context context) {
+        try {
+            ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager != null) {
+                NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+                if (info != null && info.isAvailable()) {
+                    return info.getType() == ConnectivityManager.TYPE_WIFI;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

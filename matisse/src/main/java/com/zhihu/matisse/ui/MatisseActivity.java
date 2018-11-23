@@ -64,6 +64,7 @@ import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
+import com.zhihu.matisse.internal.utils.UIUtils;
 import java.util.ArrayList;
 
 /**
@@ -144,6 +145,8 @@ public class MatisseActivity extends AppCompatActivity implements
         mOriginal = findViewById(R.id.original);
         mOriginalLayout.setOnClickListener(this);
 
+        // WiFi 网络下 默认选中原图
+        mOriginalEnable = UIUtils.isWiFi(this);
         mSelectedCollection.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mOriginalEnable = savedInstanceState.getBoolean(CHECK_STATE);
@@ -232,17 +235,22 @@ public class MatisseActivity extends AppCompatActivity implements
             // Just pass the data back to previous calling Activity.
             Uri contentUri = mMediaStoreCompat.getCurrentPhotoUri();
             String path = mMediaStoreCompat.getCurrentPhotoPath();
+
             ArrayList<Uri> selected = new ArrayList<>();
             selected.add(contentUri);
             ArrayList<String> selectedPath = new ArrayList<>();
             selectedPath.add(path);
+
             Intent result = new Intent();
             result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selected);
             result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPath);
+            result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             setResult(RESULT_OK, result);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 MatisseActivity.this.revokeUriPermission(contentUri,
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
 
             new SingleMediaScanner(this.getApplicationContext(), path, new SingleMediaScanner.ScanListener() {
                 @Override public void onScanFinish() {
