@@ -146,8 +146,10 @@ public class MatisseActivity extends AppCompatActivity implements
         mOriginal = findViewById(R.id.original);
         mOriginalLayout.setOnClickListener(this);
 
-        // WiFi 网络下 默认选中原图
-        mOriginalEnable = UIUtils.isWiFi(this);
+        // 如果设置了使用原图，且是在WiFi 网络下，就默认选中原图
+        if (mSpec.originalable) {
+            mOriginalEnable = UIUtils.isWiFi(this);
+        }
         mSelectedCollection.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mOriginalEnable = savedInstanceState.getBoolean(CHECK_STATE);
