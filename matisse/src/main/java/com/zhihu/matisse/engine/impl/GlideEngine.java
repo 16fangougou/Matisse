@@ -67,8 +67,9 @@ public class GlideEngine implements ImageEngine {
             .downloadOnly(new SimpleTarget<File>() {
                 @Override public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
                     if (PhotoMetadataUtils.isLongImage(resource.getAbsolutePath())) {
-                        imageView.setOrientation(PhotoMetadataUtils.getOrientation(resource.getAbsolutePath()));
                         imageView.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_START);
+                    } else {
+                        imageView.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE);
                     }
                     imageView.setImage(ImageSource.uri(Uri.fromFile(resource)));
                 }

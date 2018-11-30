@@ -92,6 +92,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private AlbumsSpinner mAlbumsSpinner;
     private AlbumsAdapter mAlbumsAdapter;
     private TextView mButtonPreview;
+    private TextView mButtonOriginal;
     private TextView mButtonApply;
     private View mContainer;
     private View mEmptyView;
@@ -137,6 +138,7 @@ public class MatisseActivity extends AppCompatActivity implements
         navigationIcon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
+        mButtonOriginal = (TextView) findViewById(R.id.text_original);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
         mButtonPreview.setOnClickListener(this);
         mButtonApply.setOnClickListener(this);
@@ -295,6 +297,7 @@ public class MatisseActivity extends AppCompatActivity implements
 
     private void updateOriginalState() {
         mOriginal.setChecked(mOriginalEnable);
+
         if (countOverMaxSize() > 0) {
 
             if (mOriginalEnable) {
@@ -354,6 +357,7 @@ public class MatisseActivity extends AppCompatActivity implements
 
             mOriginalEnable = !mOriginalEnable;
             mOriginal.setChecked(mOriginalEnable);
+            mButtonOriginal.setEnabled(mOriginalEnable);
 
             if (mSpec.onCheckedListener != null) {
                 mSpec.onCheckedListener.onCheck(mOriginalEnable);

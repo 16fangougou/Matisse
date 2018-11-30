@@ -85,10 +85,12 @@ public class PreviewItemFragment extends Fragment {
             videoPlayButton.setVisibility(View.GONE);
         }
 
-        final SubsamplingScaleImageView image = view.findViewById(R.id.image_view_large);
-	    image.setOrientation(SubsamplingScaleImageView.ORIENTATION_USE_EXIF);// 自动旋转
-	    image.setDoubleTapZoomDuration(300);// 放大动画时长
-	    image.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER);
+        SubsamplingScaleImageView image = view.findViewById(R.id.image_view_large);
+	    image.setDoubleTapZoomDuration(300);
+        image.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_FIXED);
+        image.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE);
+        image.setOrientation(SubsamplingScaleImageView.ORIENTATION_USE_EXIF);
+
         ImageView imageGif = view.findViewById(R.id.image_view_gif);
 
         Point size = PhotoMetadataUtils.getBitmapSize(item.getContentUri(), getActivity());
