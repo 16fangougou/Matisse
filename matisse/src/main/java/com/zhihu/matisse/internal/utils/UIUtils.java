@@ -18,6 +18,8 @@ package com.zhihu.matisse.internal.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 public class UIUtils {
 
@@ -46,5 +48,25 @@ public class UIUtils {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static int getPhoneWid(Context context) {
+        WindowManager windowManager =
+            (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metric = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(metric);
+        return metric.widthPixels;
+    }
+
+    public static int getPhoneHei(Context context) {
+        WindowManager windowManager =
+            (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metric = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(metric);
+        return metric.heightPixels;
+    }
+
+    public static float getPhoneRatio(Context context) {
+        return ((float) getPhoneHei(context)) / ((float) getPhoneWid(context));
     }
 }

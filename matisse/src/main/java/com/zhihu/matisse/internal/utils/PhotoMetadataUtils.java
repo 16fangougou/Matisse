@@ -28,14 +28,12 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
-
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.internal.entity.IncapableCause;
 import com.zhihu.matisse.internal.entity.Item;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
-import com.zhihu.matisse.internal.entity.IncapableCause;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -177,14 +175,6 @@ public final class PhotoMetadataUtils {
         return Float.valueOf(result);
     }
 
-    public static float getImageRatio(String imagePath) {
-        int[] wh = getWidthHeight(imagePath);
-        if (wh[0] > 0 && wh[1] > 0) {
-            return (float) Math.max(wh[0], wh[1]) / (float) Math.min(wh[0], wh[1]);
-        }
-        return 1;
-    }
-
     public static int[] getWidthHeight(String imagePath) {
         if (imagePath.isEmpty()) {
             return new int[] { 0, 0 };
@@ -204,11 +194,11 @@ public final class PhotoMetadataUtils {
         // 使用第二种方式获取原始图片的宽高
         if (srcHeight == -1 || srcWidth == -1) {
             try {
-                ExifInterface exifInterface = new ExifInterface(imagePath);
-                srcHeight =
-                    exifInterface.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, ExifInterface.ORIENTATION_NORMAL);
-                srcWidth =
-                    exifInterface.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, ExifInterface.ORIENTATION_NORMAL);
+                android.support.media.ExifInterface exifInterface = new android.support.media.ExifInterface(imagePath);
+                srcHeight = exifInterface.getAttributeInt(android.support.media.ExifInterface.TAG_IMAGE_LENGTH,
+                    android.support.media.ExifInterface.ORIENTATION_NORMAL);
+                srcWidth = exifInterface.getAttributeInt(android.support.media.ExifInterface.TAG_IMAGE_WIDTH,
+                    android.support.media.ExifInterface.ORIENTATION_NORMAL);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -229,24 +219,81 @@ public final class PhotoMetadataUtils {
                 }
             }
         }
+        int orient = getOrientation(imagePath);
+        if (orient == 90 || orient == 270) {
+            return new int[] { srcHeight, srcWidth };
+        }
         return new int[] { srcWidth, srcHeight };
     }
 
-    public static boolean isLongImage(String imagePath) {
+    public static float getImageRatio(String imagePath) {
         int[] wh = getWidthHeight(imagePath);
-        int w = wh[0];
-        int h = wh[1];
-        return w > 0 && h > 0 && h > w && h / w >= 3;
+        if (wh[0] > 0 && wh[1] > 0) {
+            return (float) Math.max(wh[0], wh[1]) / (float) Math.min(wh[0], wh[1]);
+        }
+        return 1;
     }
 
-    public static boolean iWidthImage(String imagePath) {
+    public static boolean isLongImage(Context context, String imagePath) {
         int[] wh = getWidthHeight(imagePath);
-        int w = wh[0];
-        int h = wh[1];
-        return w > 0 && h > 0 && w > h && w / h >= 3;
+        float w = wh[0];
+        float h = wh[1];
+        float imageRatio = (h / w);
+        float phoneRatio = UIUtils.getPhoneRatio(context) + 0.1F;
+        return (w > 0 && h > 0) && (h > w) && (imageRatio >= phoneRatio);
     }
 
-    public static int getOrientation(String imagePath) {
+    public static boolean isWideImage(Context context, String imagePath) {
+        int[] wh = getWidthHeight(imagePath);
+        float w = wh[0];
+        float h = wh[1];
+        float imageRatio = (w / h);
+        //float phoneRatio = DeviceUtils.getPhoneRatio(FanApplication.getInstance()) + 0.1F;
+        return (w > 0 && h > 0) && (w > h) && (imageRatio >= 2);
+    }
+
+    public static boolean isSmallImage(Context context, String imagePath) {
+        int[] wh = getWidthHeight(imagePath);
+        if (wh[0] < UIUtils.getPhoneWid(context)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static float getLongImageMinScale(Context context, String imagePath) {
+        int[] wh = getWidthHeight(imagePath);
+        float imageWid = wh[0];
+        float phoneWid = UIUtils.getPhoneWid(context);
+        return phoneWid / imageWid;
+    }
+
+    public static float getLongImageMaxScale(Context context, String imagePath) {
+        return getLongImageMinScale(context, imagePath) * 2;
+    }
+
+    public static float getSmallImageMinScale(Context context, String imagePath) {
+        int[] wh = getWidthHeight(imagePath);
+        float imageWid = wh[0];
+        float phoneWid = UIUtils.getPhoneWid(context);
+        return phoneWid / imageWid;
+    }
+
+    public static float getSmallImageMaxScale(Context context, String imagePath) {
+        return getSmallImageMinScale(context, imagePath) * 2;
+    }
+
+    public static float getWideImageMinScale(Context context, String imagePath) {
+        return getWideImageDoubleScale(context, imagePath) / 2;
+    }
+
+    public static float getWideImageDoubleScale(Context context, String imagePath) {
+        int[] wh = getWidthHeight(imagePath);
+        float imageHei = wh[1];
+        float phoneHei = UIUtils.getPhoneHei(context);
+        return phoneHei / imageHei;
+    }
+
+    private static int getOrientation(String imagePath) {
         try {
             ExifInterface exifInterface = new ExifInterface(imagePath);
             int orientation =

@@ -97,13 +97,15 @@ public class PreviewItemFragment extends Fragment {
         if (item.isGif()) {
             image.setVisibility(View.GONE);
             imageGif.setVisibility(View.VISIBLE);
-            SelectionSpec.getInstance().imageEngine.loadGifImage(getContext(), size.x, size.y, imageGif,
-                    item.getContentUri());
+
+            SelectionSpec.getInstance()
+                .imageEngine.loadGifImage(getContext(), size.x, size.y, imageGif, item.getContentUri());
         } else {
             image.setVisibility(View.VISIBLE);
             imageGif.setVisibility(View.GONE);
-            SelectionSpec.getInstance().imageEngine.loadImage(getContext(), size.x, size.y, image,
-                    item.getContentUri());
+
+            SelectionSpec.getInstance()
+                .imageEngine.loadImage(getContext(), size.x, size.y, image, item.getContentUri());
         }
     }
 
